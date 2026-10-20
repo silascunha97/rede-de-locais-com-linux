@@ -1,0 +1,28 @@
+# D04 - roteador Linux explicito entre duas sub-redes. Docker NAO roteia entre redes bridge distintas.
+name: d04
+services:
+  router:
+    image: nicolaka/netshoot@sha256:b09d9b21381f47a79b3cbcb30da25266dc17186ea00ae65e99fdc51396f48e70
+    command: sleep infinity
+    sysctls:
+      net.ipv4.ip_forward: "1"  # sysctl por container (namespace de rede proprio)
+    networks:
+      net_a: { ipv4_address: 192.0.2.254 }
+      net_b: { ipv4_address: 198.51.100.254 }
+  host_a:
+    image: nicolaka/netshoot@sha256:b09d9b21381f47a79b3cbcb30da25266dc17186ea00ae65e99fdc51396f48e70
+    cap_add: [NET_ADMIN]        # necessario para 'ip route add' dentro do container
+    command: sh -c "ip route add 198.51.100.0/24 via 192.0.2.254 && sleep infinity"
+    networks:
+      net_a: { ipv4_address: 192.0.2.10 }
+  host_b:
+    image: nicolaka/netshoot@sha256:b09d9b21381f47a79b3cbcb30da25266dc17186ea00ae65e99fdc51396f48e70
+    cap_add: [NET_ADMIN]
+    command: sh -c "ip route add 192.0.2.0/24 via 198.51.100.254 && sleep infinity"
+    networks:
+      net_b: { ipv4_address: 198.51.100.10 }
+networks:
+  net_a:
+    ipam: { config: [ { subnet: 192.0.2.0/24 } ] }
+  net_b:
+    ipam: { config: [ { subnet: 198.51.100.0/24 } ] }

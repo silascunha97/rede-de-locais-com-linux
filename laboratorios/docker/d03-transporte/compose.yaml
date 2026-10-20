@@ -1,0 +1,19 @@
+# D03 - servico TCP (porta 5000) e UDP (porta 5001) para comparar handshake e ausencia dele.
+name: d03
+services:
+  srv:
+    image: nicolaka/netshoot@sha256:b09d9b21381f47a79b3cbcb30da25266dc17186ea00ae65e99fdc51396f48e70
+    command: sh -c "nc -lk 5000 & nc -lku 5001 & sleep infinity"
+    networks:
+      lan: { ipv4_address: 192.0.2.10 }
+  cli:
+    image: nicolaka/netshoot@sha256:b09d9b21381f47a79b3cbcb30da25266dc17186ea00ae65e99fdc51396f48e70
+    command: sleep infinity
+    networks:
+      lan: { ipv4_address: 192.0.2.100 }
+networks:
+  lan:
+    internal: true
+    ipam:
+      config:
+        - subnet: 192.0.2.0/24

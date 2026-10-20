@@ -1,0 +1,24 @@
+# D05 - tres hosts na mesma bridge para observar ARP, tabela de vizinhos e (com limites) MACs.
+name: d05
+services:
+  h1:
+    image: nicolaka/netshoot@sha256:b09d9b21381f47a79b3cbcb30da25266dc17186ea00ae65e99fdc51396f48e70
+    command: sleep infinity
+    networks:
+      lan: { ipv4_address: 192.0.2.11 }
+  h2:
+    image: nicolaka/netshoot@sha256:b09d9b21381f47a79b3cbcb30da25266dc17186ea00ae65e99fdc51396f48e70
+    command: sleep infinity
+    networks:
+      lan: { ipv4_address: 192.0.2.12 }
+  h3:
+    image: nicolaka/netshoot@sha256:b09d9b21381f47a79b3cbcb30da25266dc17186ea00ae65e99fdc51396f48e70
+    command: sleep infinity
+    networks:
+      lan: { ipv4_address: 192.0.2.13 }
+networks:
+  lan:
+    internal: true
+    ipam:
+      config:
+        - subnet: 192.0.2.0/24

@@ -1,0 +1,19 @@
+# D01 - uma rede bridge definida pelo usuario, um servidor web e um cliente de diagnostico.
+# Imagens fixadas por digest (netshoot: tag latest em 2026-10-20; nginx:alpine = 1.31.7).
+name: d01
+services:
+  web:
+    image: nginx@sha256:892bb2152464f0c5d8972593a5f5afaf8054552580b699d95f8ff4af08c2d33d
+    networks:
+      lan: { ipv4_address: 192.0.2.10 }
+  cli:
+    image: nicolaka/netshoot@sha256:b09d9b21381f47a79b3cbcb30da25266dc17186ea00ae65e99fdc51396f48e70
+    command: sleep infinity
+    networks:
+      lan: { ipv4_address: 192.0.2.100 }
+networks:
+  lan:
+    internal: true          # sem saida para fora: nenhum NAT envolvido
+    ipam:
+      config:
+        - subnet: 192.0.2.0/24

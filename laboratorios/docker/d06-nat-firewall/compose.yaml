@@ -1,0 +1,30 @@
+# D06 - roteador com NAT (masquerade) e firewall (iptables) entre rede interna e "externa".
+# Redes bridge comuns (NAO internal: o Docker descarta trafego roteado entre redes internal). O NAT e feito pelo iptables do gw.
+name: d06
+services:
+  gw:
+    image: nicolaka/netshoot@sha256:b09d9b21381f47a79b3cbcb30da25266dc17186ea00ae65e99fdc51396f48e70
+    command: sleep infinity
+    cap_add: [NET_ADMIN]             # iptables e rotas dentro do namespace de rede do container
+    sysctls:
+      net.ipv4.ip_forward: "1"
+    networks:
+      inside:  { ipv4_address: 192.0.2.254 }
+      outside: { ipv4_address: 203.0.113.254 }
+  pc:
+    image: nicolaka/netshoot@sha256:b09d9b21381f47a79b3cbcb30da25266dc17186ea00ae65e99fdc51396f48e70
+    command: sh -c "ip route replace default via 192.0.2.254 && sleep infinity"
+    cap_add: [NET_ADMIN]
+    networks:
+      inside: { ipv4_address: 192.0.2.10 }
+  srv:
+    image: nginx@sha256:892bb2152464f0c5d8972593a5f5afaf8054552580b699d95f8ff4af08c2d33d
+    cap_add: [NET_ADMIN]        # so para remover a rota padrao do Docker (srv nao conhece a rede inside)
+    command: sh -c "ip route del default && exec nginx -g 'daemon off;'"
+    networks:
+      outside: { ipv4_address: 203.0.113.10 }
+networks:
+  inside:
+    ipam: { config: [ { subnet: 192.0.2.0/24 } ] }
+  outside:
+    ipam: { config: [ { subnet: 203.0.113.0/24 } ] }
